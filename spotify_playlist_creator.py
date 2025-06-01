@@ -1,11 +1,10 @@
 import os
-import re
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 from pathlib import Path
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, TIT2, TPE1, TALB, TPE2, TCON, TDRC
+from mutagen.id3 import ID3
 
 # Load environment variables from .env file
 load_dotenv()
@@ -97,13 +96,25 @@ class SpotifyPlaylistCreator:
             batch = track_uris[i:i+100]
             self.sp.playlist_add_items(playlist_id, batch)
     
-    def create_playlist_from_folder(self, folder_path, playlist_name=None, public=True):
-        """Main function to create a playlist from a folder of songs."""
+    def create_playlist_from_folder(self, folder_path, playlist_name=None, public=True, dry_run=False):
+        """
+        Create a playlist from a folder of songs.
+        
+        Args:
+            folder_path (str): Path to the folder containing audio files
+            playlist_name (str, optional): Name for the playlist. Defaults to folder name.
+            public (bool, optional): Whether the playlist should be public. Defaults to True.
+            dry_run (bool, optional): If True, only shows what would be done without making changes. Defaults to False.
+        """
         if not os.path.isdir(folder_path):
             raise ValueError(f"Directory not found: {folder_path}")
         
         if not playlist_name:
             playlist_name = os.path.basename(os.path.normpath(folder_path))
+        
+        if dry_run:
+            print("\n=== DRY RUN MODE ===")
+            print("No changes will be made to your Spotify account.\n")
         
         print(f"Scanning folder: {folder_path}")
         audio_files = self.get_audio_files(folder_path)
@@ -133,6 +144,22 @@ class SpotifyPlaylistCreator:
             print("No tracks found on Spotify. Playlist not created.")
             return
         
+        if dry_run:
+            print("\n=== DRY RUN RESULTS ===")
+            print(f"Would create playlist: '{playlist_name}'")
+            print(f"Would add {len(found_tracks)} tracks to the playlist:")
+            for i, track in enumerate(found_tracks, 1):
+                print(f"  {i}. {track['name']} - {track['artist']}")
+                
+            if not_found:
+                print(f"\nCould not find the following {len(not_found)} tracks on Spotify:")
+                for title in not_found:
+                    print(f"- {title}")
+            
+            print("\nDry run complete. No changes were made to your Spotify account.")
+            return
+            
+        # If not in dry run mode, proceed with actual playlist creation
         print(f"\nCreating playlist with {len(found_tracks)} tracks...")
         playlist_id = self.create_playlist(
             name=playlist_name,
@@ -167,11 +194,16 @@ def main():
         # Get playlist name from user input
         playlist_name = input("Enter a name for your playlist (or press Enter to use folder name): ").strip()
         
+        # Ask for dry run
+        dry_run = input("\nRun in dry-run mode? (y/n, default: y): ").strip().lower()
+        dry_run = dry_run != 'n'  # Default to True (dry run) unless 'n' is explicitly entered
+        
         # Create playlist
         creator.create_playlist_from_folder(
             folder_path=folder_path,
             playlist_name=playlist_name if playlist_name else None,
-            public=True
+            public=True,
+            dry_run=dry_run
         )
         
     except Exception as e:

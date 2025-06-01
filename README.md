@@ -36,7 +36,7 @@ A Python script that creates Spotify playlists from local music files by matchin
    - Click "Create App"
    - Fill in the app details and create
    - Note down your Client ID and Client Secret
-   - Click on "Edit Settings" and add `http://localhost:8888/callback` to the Redirect URIs
+   - Click on "Edit Settings" and add `http://127.0.0.1:8888/callback` to the Redirect URIs
 
 4. Create a `.env` file:
    - Copy the `.env.example` file to `.env`
@@ -44,7 +44,7 @@ A Python script that creates Spotify playlists from local music files by matchin
    ```
    SPOTIFY_CLIENT_ID=your_client_id_here
    SPOTIFY_CLIENT_SECRET=your_client_secret_here
-   SPOTIFY_REDIRECT_URI=http://localhost:8888/callback
+   SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
    ```
 
 ## Usage
