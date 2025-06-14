@@ -9,15 +9,13 @@ class TrackFinder:
         """
         self.sp = sp_client
 
-    def _build_search_query(self, title, artist, album):
+    def _build_search_query(self, title, artist):
         """Build a search query for Spotify, including only non-null fields."""
         query_parts = []
         if title:
             query_parts.append(f'track:"{title}"')
         if artist:
             query_parts.append(f'artist:"{artist}"')
-        if album:
-            query_parts.append(f'album:"{album}"')
         
         return ' '.join(query_parts) if query_parts else None
 
@@ -38,19 +36,18 @@ class TrackFinder:
     def search_spotify_track(self, song_info):
         """
         Search for a track on Spotify using a simplified, two-attempt strategy.
-        1. Search with original metadata (title, artist, album).
+        1. Search with original metadata (title, artist).
         2. If it fails and the track is in Greek, retry with Greeklish versions.
         The first result from the API is considered the match.
         """
         title = song_info.get('title', '')
         artist = song_info.get('artist', '')
-        album = song_info.get('album', '')
         
         cleaned_title = clean_title(title)
         cleaned_artist = clean_artist(artist)
 
         # Attempt 1: Search with original, cleaned metadata
-        query = self._build_search_query(cleaned_title, cleaned_artist, album)
+        query = self._build_search_query(cleaned_title, cleaned_artist)
         track = self._perform_search(query)
         if track:
             return track
@@ -61,7 +58,7 @@ class TrackFinder:
             greeklish_artist = greek_to_greeklish(cleaned_artist)
             
             if greeklish_title != cleaned_title or greeklish_artist != cleaned_artist:
-                greeklish_query = self._build_search_query(greeklish_title, greeklish_artist, album)
+                greeklish_query = self._build_search_query(greeklish_title, greeklish_artist)
                 track = self._perform_search(greeklish_query)
                 if track:
                     return track
