@@ -1,5 +1,11 @@
 import re
 
+def is_greek(text):
+    """Check if a string contains Greek characters.""" 
+    if not text:
+        return False
+    return bool(re.search(r'[\u0370-\u03ff]', text))
+
 def clean_title(title):
     """Clean and normalize the track title for better search results."""
     if not title:
@@ -23,6 +29,12 @@ def clean_title(title):
         
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     return cleaned
+
+def clean_artist(artist):
+    """Clean and normalize the artist name for better search results."""
+    if not artist:
+        return ""
+    return artist.strip().lower()
 
 def greek_to_greeklish(text):
     """Convert Greek characters to Greeklish."""

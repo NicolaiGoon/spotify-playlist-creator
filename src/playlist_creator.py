@@ -2,6 +2,7 @@ import os
 from .metadata_utils import get_audio_files, get_song_info
 from .track_finder import TrackFinder
 from .spotify_client import SpotifyClient
+from tqdm import tqdm
 
 class PlaylistCreator:
     def __init__(self, spotify_client: SpotifyClient):
@@ -12,7 +13,7 @@ class PlaylistCreator:
         """Process audio files to find them on Spotify."""
         found_tracks_uris = []
         not_found_tracks_info = []
-        for audio_file in audio_files:
+        for audio_file in tqdm(audio_files, desc="Processing files", unit="file"):
             song_info = get_song_info(audio_file)
             track = self.track_finder.search_spotify_track(song_info)
             if track:
